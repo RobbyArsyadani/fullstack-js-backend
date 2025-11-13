@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".", // titik = root project
+    "paths": {
+      "#root/*": ["src/*"] // @ -> folder src
+    }
+  }
+}
+
