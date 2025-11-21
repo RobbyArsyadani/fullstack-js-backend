@@ -1,16 +1,16 @@
 import db from "#root/database/db.js";
 
-export const createProduct = async ({ name, description }) => {
+export const createProduct = async ({ name, description, image }) => {
   const [result] = await db.query(
-    "INSERT INTO products (product_name, product_description) VALUES(?, ?)",
-    [name, description]
+    "INSERT INTO products (product_name, product_description, image_path) VALUES(?, ?, ?)",
+    [name, description, image]
   );
   return { id: result.insertId, result };
 };
 
 export const findProductById = async (id) => {
   const [rows] = await db.query(
-    "SELECT id, product_name, product_description FROM products WHERE id = ?",
+    "SELECT id, product_name, product_description, image_path FROM products WHERE id = ?",
     [id]
   );
   return rows[0];
@@ -18,7 +18,7 @@ export const findProductById = async (id) => {
 
 export const findAllProducts = async () => {
   const [rows] = await db.query(
-    "SELECT id, product_name, product_description FROM products"
+    "SELECT id, product_name, product_description, image_path FROM products"
   );
   return rows;
 };
@@ -28,17 +28,17 @@ export const deleteProduct = async (id) => {
   return result.affectedRows > 0;
 };
 
-export const updateProduct = async (id, { name, description }) => {
+export const updateProduct = async (id, { name, description, image }) => {
   const [rows] = await db.query(
-    "UPDATE products SET product_name = ?, product_description = ? WHERE id = ?",
-    [name, description, id]
+    "UPDATE products SET product_name = ?, product_description = ?, image_path = ? WHERE id = ?",
+    [name, description, image, id]
   );
   return findProductById(id);
 };
 
 export const findProductByName = async (name) => {
   const [data] = await db.query(
-    "SELECT id, product_name, product_description FROM products WHERE product_name = ?",
+    "SELECT id, product_name, product_description, image_path FROM products WHERE product_name = ?",
     [name]
   );
 

@@ -14,3 +14,10 @@ export const registerValidation = [
   body("password").notEmpty(),
 ];
 
+export const onlyAdmin = (req, res, next) => {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Hanya admin yang boleh akses" });
+  }
+  next();
+};
+

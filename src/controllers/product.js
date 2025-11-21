@@ -6,6 +6,7 @@ import {
   findProductByName,
   updateProduct,
 } from "#root/models/productModel.js";
+import { deleteFile } from "#root/utils/deleteFile.js";
 
 export const getAllProducts = async (req, res) => {
   const data = await findAllProducts();
@@ -32,17 +33,21 @@ export const getProductById = async (req, res) => {
 export const deleteProductById = async (req, res) => {
   const { id } = req.params;
 
-  const exsisting = await findProductById(id);
+  const existing = await findProductById(id);
 
-  if (!exsisting) {
+  if (!existing) {
     return res.status(404).json({ message: "Data tidak ditemukan" });
+  }
+
+  if (existing.image_path) {
+    deleteFile(existing.image_path);
   }
 
   await deleteProduct(id);
 
   return res
     .status(200)
-    .json({ data: exsisting, message: "Data berhasil dihapus" });
+    .json({ data: existing, message: "Data berhasil dihapus" });
 };
 
 export const makeProduct = async (req, res) => {
@@ -54,21 +59,34 @@ export const makeProduct = async (req, res) => {
     return res.status(400).json({ message: "Product sudah ada" });
   }
 
-  const data = await createProduct({ name, description });
+  const image = req.file ? req.file.filename : null;
 
-  return res.status(200).json({ data, message: "Produk berhasil ditambahkan" });
+  const data = await createProduct({ name, description, image });
+
+  return res.status(201).json({ data, message: "Produk berhasil ditambahkan" });
 };
 
 export const updatedProduct = async (req, res) => {
   const { name, description } = req.body;
   const { id } = req.params;
+  const newImage = req.file?.filename;
 
-  const data = await updateProduct(id, { name, description });
+  const existing = await findProductById(id);
 
-  if (!data) {
-    res.status(404).json({ message: "Data tidak ditemukan" });
+  if (!existing) {
+    return res.status(404).json({ message: "Data tidak ditemukan" });
   }
 
-  return res.status(200).json({ data, message: "Data berhaasil diperbarui" });
+  if (newImage && existing.image_path) {
+    deleteFile(existing.image_path);
+  }
+
+  const data = await updateProduct(id, {
+    name,
+    description,
+    image: newImage || existing.image_path,
+  });
+
+  return res.status(200).json({ data, message: "Data berhasil diperbarui" });
 };
 
